@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var showingAddDeck = false
     @State private var showingSettings = false
     @State private var backupMessage: String?
+    @State private var editingDeck: Deck?
 
     var body: some View {
         NavigationStack {
@@ -15,6 +16,12 @@ struct ContentView: View {
                     ForEach(store.decks) { deck in
                         NavigationLink(value: deck) {
                             DeckRow(deck: deck)
+                        }
+                        .swipeActions {
+                            Button("Edit") {
+                                editingDeck = deck
+                            }
+                            .tint(.blue)
                         }
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
@@ -50,6 +57,14 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddDeck) {
             AddDeckView { name, summary in
                 Task { await store.addDeck(name: name, summary: summary) }
+            }
+        }
+        .sheet(item: $editingDeck) { deck in
+            EditDeckView(deck: deck) { name, summary in
+                var updated = deck
+                updated.name = name
+                updated.summary = summary
+                Task { await store.replace(updated) }
             }
         }
         .sheet(isPresented: $showingSettings) {

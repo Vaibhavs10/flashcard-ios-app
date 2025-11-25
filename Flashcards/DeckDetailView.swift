@@ -8,6 +8,7 @@ struct DeckDetailView: View {
     @State private var currentIndex: Int = 0
     @State private var showingBack: Bool = false
     @State private var showingAddCard: Bool = false
+    @State private var editingCard: Card?
     @State private var randomOrder: Bool = false
     @State private var sessionStart: Date?
 
@@ -50,6 +51,14 @@ struct DeckDetailView: View {
                     .buttonStyle(CapsuleButtonStyle())
                     .keyboardShortcut(.space, modifiers: [])
 
+                    Button {
+                        editingCard = currentCard
+                    } label: {
+                        Label("Edit Card", systemImage: "pencil")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(CapsuleButtonStyle())
+
                     gradeRow
                 }
 
@@ -70,6 +79,11 @@ struct DeckDetailView: View {
         .sheet(isPresented: $showingAddCard) {
             AddCardView { card in
                 Task { await store.addCard(card, to: liveDeck) }
+            }
+        }
+        .sheet(item: $editingCard) { card in
+            EditCardView(card: card) { updated in
+                Task { await store.updateCard(updated, in: liveDeck) }
             }
         }
         .onChange(of: studyCards.count) { _ in

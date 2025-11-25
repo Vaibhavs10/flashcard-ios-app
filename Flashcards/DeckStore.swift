@@ -43,6 +43,13 @@ final class DeckStore: ObservableObject {
         await save()
     }
 
+    func updateCard(_ card: Card, in deck: Deck) async {
+        guard let deckIndex = decks.firstIndex(where: { $0.id == deck.id }),
+              let cardIndex = decks[deckIndex].cards.firstIndex(where: { $0.id == card.id }) else { return }
+        decks[deckIndex].cards[cardIndex] = card
+        await save()
+    }
+
     func review(card: Card, in deck: Deck, quality: ReviewQuality) async {
         guard let deckIndex = decks.firstIndex(where: { $0.id == deck.id }),
               let cardIndex = decks[deckIndex].cards.firstIndex(where: { $0.id == card.id }) else { return }
