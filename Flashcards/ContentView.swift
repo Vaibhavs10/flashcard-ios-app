@@ -3,6 +3,8 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var store: DeckStore
     @State private var showingAddDeck = false
+    @State private var showingSettings = false
+    @State private var backupMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -36,12 +38,23 @@ struct ContentView: View {
                         Label("Add Deck", systemImage: "plus")
                     }
                 }
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                }
             }
         }
         .sheet(isPresented: $showingAddDeck) {
             AddDeckView { name, summary in
                 Task { await store.addDeck(name: name, summary: summary) }
             }
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView(backupMessage: $backupMessage)
+                .environmentObject(store)
         }
     }
 
@@ -59,6 +72,16 @@ private struct DeckRow: View {
                 Text(deck.summary)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Label("\(deck.dueCount) due", systemImage: "clock")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if deck.currentStreak > 0 {
+                        Label("\(deck.currentStreak)d streak", systemImage: "flame")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                }
             }
             Spacer()
             Text("\(deck.count)")
