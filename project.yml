@@ -1,0 +1,23 @@
+name: Flashcards
+options:
+  bundleIdPrefix: com.vb
+  deploymentTarget:
+    iOS: 17.0
+targets:
+  Flashcards:
+    type: application
+    platform: iOS
+    sources:
+      - path: Flashcards
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.vb.flashcards
+      INFOPLIST_FILE: Flashcards/Info.plist
+    scheme:
+      testTargets: []
+schemes:
+  Flashcards:
+    build:
+      targets:
+        Flashcards: all
+    run:
+      config: Debug
