@@ -41,24 +41,6 @@ struct DeckDetailView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: studyCards)
                         .frame(maxHeight: 360)
 
-                    Button {
-                        haptic(.light)
-                        showingBack.toggle()
-                    } label: {
-                        Label(showingBack ? "Show Front" : "Show Back", systemImage: "rectangle.on.rectangle")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(CapsuleButtonStyle())
-                    .keyboardShortcut(.space, modifiers: [])
-
-                    Button {
-                        editingCard = currentCard
-                    } label: {
-                        Label("Edit Card", systemImage: "pencil")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(CapsuleButtonStyle())
-
                     gradeRow
                 }
 
@@ -67,12 +49,42 @@ struct DeckDetailView: View {
             .padding()
         }
         .navigationTitle(liveDeck.name)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     showingAddCard = true
                 } label: {
                     Label("Add Card", systemImage: "plus")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Toggle(isOn: $randomOrder) {
+                        Label("Shuffle", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+            ToolbarItem(placement: .bottomBar) {
+                HStack(spacing: 12) {
+                    Button {
+                        haptic(.light)
+                        showingBack.toggle()
+                    } label: {
+                        Label(showingBack ? "Show Front" : "Show Back", systemImage: "rectangle.on.rectangle")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.accentColor)
+                    .keyboardShortcut(.space, modifiers: [])
+
+                    Button {
+                        editingCard = currentCard
+                    } label: {
+                        Label("Edit Card", systemImage: "pencil")
+                    }
+                    .buttonStyle(.bordered)
                 }
             }
         }
@@ -85,6 +97,8 @@ struct DeckDetailView: View {
             EditCardView(card: card) { updated in
                 Task { await store.updateCard(updated, in: liveDeck) }
             }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .onChange(of: studyCards.count) { _ in
             currentIndex = min(currentIndex, max(studyCards.count - 1, 0))
@@ -114,20 +128,8 @@ struct DeckDetailView: View {
     @ViewBuilder
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text(liveDeck.name)
-                    .font(.title2.bold())
-                Spacer()
-                Toggle(isOn: $randomOrder) {
-                    Label("Shuffle", systemImage: "shuffle")
-                        .labelStyle(.titleAndIcon)
-                        .font(.caption.weight(.semibold))
-                }
-                .toggleStyle(.switch)
-                .labelsHidden()
-                .tint(AppTheme.accent)
-                .accessibilityLabel("Shuffle cards")
-            }
+            Text(liveDeck.name)
+                .font(.title2.bold())
 
             HStack(spacing: 12) {
                 StatPill(label: "Due", value: store.dueCards(for: liveDeck).count)
@@ -146,7 +148,8 @@ struct DeckDetailView: View {
             } label: {
                 Label("Again", systemImage: "arrow.counterclockwise")
             }
-            .tint(.red.opacity(0.8))
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
             .keyboardShortcut("1", modifiers: [])
 
             Button {
@@ -155,7 +158,8 @@ struct DeckDetailView: View {
             } label: {
                 Label("Good", systemImage: "checkmark")
             }
-            .tint(.blue)
+            .buttonStyle(.borderedProminent)
+            .tint(.accentColor)
             .keyboardShortcut("2", modifiers: [])
 
             Button {
@@ -164,10 +168,10 @@ struct DeckDetailView: View {
             } label: {
                 Label("Easy", systemImage: "sparkles")
             }
+            .buttonStyle(.borderedProminent)
             .tint(.green)
             .keyboardShortcut("3", modifiers: [])
         }
-        .buttonStyle(CapsuleButtonStyle())
     }
 
     private func handleReview(_ quality: ReviewQuality) {

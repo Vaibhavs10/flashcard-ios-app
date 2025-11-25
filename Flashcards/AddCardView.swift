@@ -60,6 +60,8 @@ struct AddCardView: View {
                 }
             }
         }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
     @Environment(\.colorScheme) private var colorScheme

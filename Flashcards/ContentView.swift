@@ -23,14 +23,12 @@ struct ContentView: View {
                             }
                             .tint(.blue)
                         }
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
                     }
                     .onDelete { offsets in
                         Task { await store.deleteDeck(at: offsets) }
                     }
                 }
-                .scrollContentBackground(.hidden)
+                .listStyle(.insetGrouped)
             }
             .navigationTitle("Decks")
             .navigationDestination(for: Deck.self) { deck in
@@ -58,6 +56,8 @@ struct ContentView: View {
             AddDeckView { name, summary in
                 Task { await store.addDeck(name: name, summary: summary) }
             }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(item: $editingDeck) { deck in
             EditDeckView(deck: deck) { name, summary in
@@ -66,10 +66,14 @@ struct ContentView: View {
                 updated.summary = summary
                 Task { await store.replace(updated) }
             }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView(backupMessage: $backupMessage)
                 .environmentObject(store)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
     }
 
@@ -101,13 +105,9 @@ private struct DeckRow: View {
             Spacer()
             Text("\(deck.count)")
                 .font(.footnote.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(AppTheme.accentSoft, in: Capsule())
-                .foregroundStyle(AppTheme.accent)
+                .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 8)
-        .subtleCard()
+        .padding(.vertical, 6)
     }
 }
 

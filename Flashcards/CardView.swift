@@ -9,6 +9,7 @@ struct CardView: View {
             HStack {
                 Label(card.kind.displayName, systemImage: card.kind == .word ? "textformat.abc" : "quote.opening")
                     .font(.footnote.weight(.semibold))
+                    .symbolRenderingMode(.hierarchical)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(AppTheme.accentSoft, in: Capsule())
