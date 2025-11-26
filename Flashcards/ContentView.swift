@@ -17,7 +17,14 @@ struct ContentView: View {
                         NavigationLink(value: deck) {
                             DeckRow(deck: deck)
                         }
-                        .swipeActions {
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                confirmDeleteDeck = deck
+                                showingDeleteAlert = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+
                             Button("Edit") {
                                 editingDeck = deck
                             }
@@ -75,9 +82,21 @@ struct ContentView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        .alert("Delete deck?", isPresented: $showingDeleteAlert, presenting: confirmDeleteDeck) { deck in
+            Button("Delete", role: .destructive) {
+                if let idx = store.decks.firstIndex(where: { $0.id == deck.id }) {
+                    Task { await store.deleteDeck(at: IndexSet(integer: idx)) }
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: { deck in
+            Text("This will remove \"\(deck.name)\" and its cards.")
+        }
     }
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var confirmDeleteDeck: Deck?
+    @State private var showingDeleteAlert = false
 }
 
 private struct DeckRow: View {
